@@ -85,6 +85,8 @@ class Category extends Model
         return $this->updated_at;
     }
 
+    
+
     // Inserir categoria
     public function insert(): bool
     {
@@ -117,11 +119,11 @@ class Category extends Model
     }
 
     // Buscar categoria por nome
-    public function findByName(string $name): bool
+    public function findByCode(string $code): bool
     {
-        $sql = "SELECT * FROM categories WHERE name = :name";
+        $sql = "SELECT * FROM categories WHERE code = :code";
         $stmt = Connect::getInstance()->prepare($sql);
-        $stmt->bindValue(":name", $name);
+        $stmt->bindValue(":code", $code);
 
         try {
             $stmt->execute();
@@ -130,12 +132,11 @@ class Category extends Model
                 return false;
             }
 
-            $this->id = $result->id;
-            $this->name = $result->name;
-            $this->description = $result->description;
-            $this->active = $result->active;
-            $this->created_at = $result->created_at;
-            $this->updated_at = $result->updated_at;
+            foreach ($result as $key => $value) {
+                if (property_exists($this, $key)) {
+                    $this->{$key} = $value;
+                }
+            }
 
             return true;
         } catch (PDOException $e) {
@@ -143,6 +144,38 @@ class Category extends Model
             return false;
         }
     }
+
+   public function update(): bool
+{
+    $this->updated_at = date('Y-m-d H:i:s');
+    
+    try {
+        $sql = "UPDATE categories SET 
+                name = :name, 
+                description = :description, 
+                active = :active, 
+                updated_at = :updated_at 
+                WHERE id = :id";
+        
+        // Use o mesmo método de conexão que você usa em findById() ou insert()
+        $connection = $this->getConnection(); // ajuste conforme sua classe pai
+        $stmt = $connection->prepare($sql);
+        
+        $result = $stmt->execute([
+            ':name' => $this->name,        // ou $this->name se a propriedade for em inglês
+            ':description' => $this->description, // ou $this->description
+            ':active' => $this->active,     // ou $this->active
+            ':updated_at' => $this->updated_at,
+            ':id' => $this->id
+        ]);
+        
+        return $result;
+        
+    } catch (Exception $e) {
+        $this->errorMessage = "Erro ao atualizar categoria: " . $e->getMessage();
+        return false;
+    }
+}
 
 public function delete(): bool
 {

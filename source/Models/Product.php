@@ -9,7 +9,7 @@ use PDOException;
 class Product extends Model
 {
 
-        private $userAuth; // ou public/protected, conforme seu uso
+        //private $userAuth; // ou public/protected, conforme seu uso
 
 
     protected $id;
@@ -124,7 +124,6 @@ class Product extends Model
     // Insere o produto no banco
     public function insert(): bool
     {
-        $this->id = uniqid(); // ou use UUID se o banco aceitar
         $this->created_at = date('Y-m-d H:i:s');
         $this->updated_at = date('Y-m-d H:i:s');
 
@@ -165,7 +164,6 @@ class Product extends Model
 
 public function update(): bool
 {
-    
     if (!$this->id) {
         $this->errorMessage = "ID do produto não definido para atualização.";
         return false;
@@ -174,7 +172,6 @@ public function update(): bool
     $this->updated_at = date('Y-m-d H:i:s');
 
     $sql = "UPDATE products SET
-                id = :id,
                 code = :code,
                 name = :name,
                 description = :description,
@@ -190,11 +187,12 @@ public function update(): bool
 
     $stmt = Connect::getInstance()->prepare($sql);
     
-    $stmt->bindValue(":id", $this->id);
+    // Removido o bind duplo do ID - agora só bind no WHERE
+    $stmt->bindValue(":id", $this->id, \PDO::PARAM_INT);
     $stmt->bindValue(":code", $this->code);
     $stmt->bindValue(":name", $this->name);
     $stmt->bindValue(":description", $this->description);
-    $stmt->bindValue(":category_id", $this->category_id);
+    $stmt->bindValue(":category_id", $this->category_id, \PDO::PARAM_INT);
     $stmt->bindValue(":unit", $this->unit);
     $stmt->bindValue(":cost_price", $this->cost_price);
     $stmt->bindValue(":sale_price", $this->sale_price);
@@ -204,7 +202,12 @@ public function update(): bool
     $stmt->bindValue(":updated_at", $this->updated_at);
 
     try {
-        return $stmt->execute();
+        $result = $stmt->execute();
+        if (!$result) {
+            $this->errorMessage = "Erro ao executar a atualização: " . implode(", ", $stmt->errorInfo());
+            return false;
+        }
+        return true;
     } catch (PDOException $e) {
         $this->errorMessage = "Erro ao atualizar o produto: " . $e->getMessage();
         return false;
@@ -213,10 +216,27 @@ public function update(): bool
 
 public function delete(): bool
 {
-    $stmt = Connect::getInstance()->prepare("DELETE FROM products WHERE id = :id");
-    $stmt->bindValue(":id", $this->id);
-    return $stmt->execute();
+    if (!$this->id) {
+        $this->errorMessage = "ID do produto não definido para exclusão.";
+        return false;
+    }
+
+    try {
+        $stmt = Connect::getInstance()->prepare("DELETE FROM products WHERE id = :id");
+        $stmt->bindValue(":id", $this->id);
+
+        if (!$stmt->execute()) {
+            $this->errorMessage = "Erro ao executar a exclusão: " . implode(", ", $stmt->errorInfo());
+            return false;
+        }
+
+        return true;
+    } catch (PDOException $e) {
+        $this->errorMessage = "Erro ao excluir o produto: " . $e->getMessage();
+        return false;
+    }
 }
+
 
 
 }

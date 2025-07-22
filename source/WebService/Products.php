@@ -14,8 +14,8 @@ class Products extends Api
     {
         // Pegar parâmetros de filtro e paginação
         $filters = [
-            'categoria_id' => $_GET['categoria_id'] ?? null,
-            'ativo' => $_GET['ativo'] ?? null,
+            'category_id' => $_GET['category_id'] ?? null,
+            'active' => $_GET['active'] ?? null,
             'search' => $_GET['search'] ?? null,
             'baixo_estoque' => $_GET['baixo_estoque'] ?? null
         ];
@@ -39,42 +39,23 @@ class Products extends Api
      */
     public function createProduct(array $data): void
     {
-        $this->auth(); // Verificar autenticação
+         $this->auth(); // Verificar autenticação
 
-        // Validar campos obrigatórios
-        $required = ['codigo', 'name', 'categoria_id', 'unidade_medida', 'preco_custo', 'preco_venda'];
-        foreach ($required as $field) {
-            if (empty($data[$field])) {
-                $this->call(400, "bad_request", "Campo '{$field}' é obrigatório", "error")->back();
-                return;
-            }
-        }
-
-        // Validar se categoria existe
-        $category = new Category();
-        if (!$category->findById($data['categoria_id'])) {
-            $this->call(400, "bad_request", "Categoria não encontrada", "error")->back();
-            return;
-        }
-
-        // Validar valores numéricos
-        if (!is_numeric($data['preco_custo']) || !is_numeric($data['preco_venda'])) {
-            $this->call(400, "bad_request", "Preços devem ser valores numéricos", "error")->back();
+        if (empty($data['name'])) {
+            $this->call(400, "bad_request", "Nome da categoria é obrigatório", "error")->back();
             return;
         }
 
         $product = new Product(
-            null, // id será gerado automaticamente
-            $data['codigo'],
+            $data['id'],
+            $data['code'],
             $data['name'],
-            $data['descricao'] ?? null,
-            $data['categoria_id'],
-            $data['unidade_medida'],
-            (float)$data['preco_custo'],
-            (float)$data['preco_venda'],
-            (int)($data['estoque_minimo'] ?? 0),
-            (int)($data['estoque_maximo'] ?? 0),
-            $data['ativo'] ?? true
+            $data['description'] ?? null,
+            $data['category_id'],
+            $data['unit'],
+            $data['cost_price'],
+            $data['sale_price'],
+            $data['active'] ?? true
         );
 
         if (!$product->insert()) {
@@ -82,17 +63,11 @@ class Products extends Api
             return;
         }
 
-        // Resposta com dados do produto criado
-        $response = [
+        $this->call(201, "created", "Produto criada com sucesso", "success")->back([
             "id" => $product->getId(),
-            "codigo" => $product->getCode(),
             "name" => $product->getName(),
-            "categoria_id" => $product->getCategoryId(),
-            "preco_venda" => $product->getSalePrice(),
-            "ativo" => $product->getActive()
-        ];
-
-        $this->call(201, "created", "Produto criado com sucesso", "success")->back($response);
+            "active" => $product->getActive()
+        ]);
     }
 
     /**
@@ -118,16 +93,16 @@ class Products extends Api
 
         $response = [
             "id" => $product->getId(),
-            "codigo" => $product->getCode(),
+            "code" => $product->getCode(),
             "name" => $product->getName(),
-            "descricao" => $product->getDescription(),
-            "categoria_id" => $product->getCategoryId(),
-            "unidade_medida" => $product->getUnit(),
-            "preco_custo" => $product->getCostPrice(),
-            "preco_venda" => $product->getSalePrice(),
-            "estoque_minimo" => $product->getMinStock(),
-            "estoque_maximo" => $product->getMaxStock(),
-            "ativo" => $product->getActive(),
+            "description" => $product->getDescription(),
+            "category_id" => $product->getCategoryId(),
+            "unit" => $product->getUnit(),
+            "cost_price" => $product->getCostPrice(),
+            "sale_price" => $product->getSalePrice(),
+            "min_stock" => $product->getMinStock(),
+            "max_stock" => $product->getMaxStock(),
+            "active" => $product->getActive(),
             "created_at" => $product->getCreatedAt(),
             "updated_at" => $product->getUpdatedAt()
         ];
@@ -138,244 +113,151 @@ class Products extends Api
     /**
      * Atualiza um produto
      */
-    public function updateProduct(array $data): void 
+   public function updateProduct(array $data): void 
 {
     $this->auth(); // Verificar autenticação
     
-    // Debug: Log dos dados recebidos
-    error_log("=== UPDATE PRODUCT DEBUG ===");
-    error_log("Dados recebidos: " . json_encode($data));
-    error_log("Chaves disponíveis: " . implode(', ', array_keys($data)));
-    error_log("Total de campos recebidos: " . count($data));
-    
-    if (!isset($data["id"])) {
-        error_log("ERRO: ID não fornecido");
+    // Validar se o ID foi fornecido
+    if (empty($data["id"])) {
         $this->call(400, "bad_request", "ID é obrigatório", "error")->back();
         return;
     }
     
-    error_log("ID do produto: " . $data["id"]);
-    
     // Buscar o produto existente
     $product = new Product();
     if (!$product->findById($data["id"])) {
-        error_log("ERRO: Produto não encontrado com ID: " . $data["id"]);
         $this->call(404, "not_found", "Produto não encontrado", "error")->back();
         return;
     }
     
-    error_log("Produto encontrado - ID: " . $product->getId());
-    error_log("Dados atuais do produto: " . json_encode([
-        'id' => $product->getId(),
-        'codigo' => $product->getCode(),
-        'name' => $product->getName(),
-        'categoria_id' => $product->getCategoryId(),
-        'preco_custo' => $product->getCostPrice(),
-        'preco_venda' => $product->getSalePrice()
-    ]));
+    // Lista dos campos que podem ser atualizados
+    $allowedFields = [
+        'code' => 'setCode',
+        'name' => 'setName', 
+        'description' => 'setDescription',
+        'category_id' => 'setCategoryId',
+        'unit' => 'setUnit',
+        'cost_price' => 'setCostPrice',
+        'sale_price' => 'setSalePrice',
+        'min_stock' => 'setMinStock',
+        'max_stock' => 'setMaxStock',
+        'active' => 'setActive'
+    ];
     
-    // Validar categoria se fornecida
-    if (isset($data['categoria_id'])) {
-        error_log("Validando categoria ID: " . $data['category_id']);
-        $category = new Category();
-        if (!$category->findById($data['category_id'])) {
-            error_log("ERRO: Categoria não encontrada: " . $data['category_id']);
-            $this->call(400, "bad_request", "Categoria não encontrada", "error")->back();
-            return;
-        }
-        error_log("Categoria válida: " . $data['category_id']);
-    }
+    $updated = false;
     
-    // Validar preços se fornecidos
-    if (isset($data['preco_custo'])) {
-        error_log("Validando preço de custo: " . $data['preco_custo']);
-        if (!is_numeric($data['preco_custo'])) {
-            error_log("ERRO: Preço de custo não é numérico: " . $data['preco_custo']);
-            $this->call(400, "bad_request", "Preço de custo deve ser numérico", "error")->back();
-            return;
-        }
-        error_log("Preço de custo válido: " . $data['preco_custo']);
-    }
-    
-    if (isset($data['preco_venda'])) {
-        error_log("Validando preço de venda: " . $data['preco_venda']);
-        if (!is_numeric($data['preco_venda'])) {
-            error_log("ERRO: Preço de venda não é numérico: " . $data['preco_venda']);
-            $this->call(400, "bad_request", "Preço de venda deve ser numérico", "error")->back();
-            return;
-        }
-        error_log("Preço de venda válido: " . $data['preco_venda']);
-    }
-    
-    // Verificar se há campos para atualizar
-    $camposParaAtualizar = [];
+    // DEBUG: Vamos ver o que está chegando
+    error_log("=== DEBUG UPDATE PRODUCT ===");
+    error_log("Dados recebidos: " . json_encode($data));
+    error_log("Campos permitidos: " . implode(', ', array_keys($allowedFields)));
     
     // Atualizar apenas os campos fornecidos
-    if (isset($data['codigo'])) {
-        error_log("Atualizando código: " . $data['codigo']);
-        $product->setCode($data['codigo']);
-        $camposParaAtualizar[] = 'codigo';
-    }
-    
-    if (isset($data['name'])) {
-        error_log("Atualizando nome: " . $data['name']);
-        $product->setName($data['name']);
-        $camposParaAtualizar[] = 'name';
-    }
-    
-    if (isset($data['descricao'])) {
-        error_log("Atualizando descrição: " . $data['descricao']);
-        $product->setDescription($data['descricao']);
-        $camposParaAtualizar[] = 'descricao';
-    }
-    
-    if (isset($data['categoria_id'])) {
-        error_log("Atualizando categoria_id: " . $data['categoria_id']);
-        $product->setCategoryId($data['categoria_id']);
-        $camposParaAtualizar[] = 'categoria_id';
-    }
-    
-    if (isset($data['unidade_medida'])) {
-        error_log("Atualizando unidade_medida: " . $data['unidade_medida']);
-        $product->setUnit($data['unidade_medida']);
-        $camposParaAtualizar[] = 'unidade_medida';
-    }
-    
-    if (isset($data['preco_custo'])) {
-        $precoCusto = (float)$data['preco_custo'];
-        error_log("Atualizando preco_custo: " . $precoCusto);
-        $product->setCostPrice($precoCusto);
-        $camposParaAtualizar[] = 'preco_custo';
-    }
-    
-    if (isset($data['preco_venda'])) {
-        $precoVenda = (float)$data['preco_venda'];
-        error_log("Atualizando preco_venda: " . $precoVenda);
-        $product->setSalePrice($precoVenda);
-        $camposParaAtualizar[] = 'preco_venda';
-    }
-    
-    if (isset($data['estoque_minimo'])) {
-        $estoqueMin = (int)$data['estoque_minimo'];
-        error_log("Atualizando estoque_minimo: " . $estoqueMin);
-        $product->setMinStock($estoqueMin);
-        $camposParaAtualizar[] = 'estoque_minimo';
-    }
-    
-    if (isset($data['estoque_maximo'])) {
-        $estoqueMax = (int)$data['estoque_maximo'];
-        error_log("Atualizando estoque_maximo: " . $estoqueMax);
-        $product->setMaxStock($estoqueMax);
-        $camposParaAtualizar[] = 'estoque_maximo';
-    }
-    
-    if (isset($data['ativo'])) {
-        $ativo = (bool)$data['ativo'];
-        error_log("Atualizando ativo: " . ($ativo ? 'true' : 'false'));
-        $product->setActive($ativo);
-        $camposParaAtualizar[] = 'ativo';
-    }
-    
-    // Verificar se há campos para atualizar
-    if (empty($camposParaAtualizar)) {
-        error_log("AVISO: Nenhum campo fornecido para atualização");
-        $this->call(400, "bad_request", "Nenhum campo fornecido para atualização", "warning")->back();
-        return;
-    }
-    
-    error_log("Campos que serão atualizados: " . implode(', ', $camposParaAtualizar));
-    
-    // Log dos dados do produto antes da atualização
-    error_log("Dados do produto ANTES da atualização: " . json_encode([
-        'id' => $product->getId(),
-        'codigo' => $product->getCode(),
-        'name' => $product->getName(),
-        'categoria_id' => $product->getCategoryId(),
-        'preco_custo' => $product->getCostPrice(),
-        'preco_venda' => $product->getSalePrice(),
-        'ativo' => $product->getActive()
-    ]));
-    
-    // Verificar se o método update existe
-    if (!method_exists($product, 'update')) {
-        error_log("ERRO CRÍTICO: Método 'update' não existe na classe Product");
-        $this->call(500, "internal_server_error", "Método de atualização não encontrado", "error")->back();
-        return;
-    }
-    
-    error_log("Executando $product->update()...");
-    
-    // Tentar atualizar
-    $updateResult = $product->update();
-    
-    error_log("Resultado do update(): " . ($updateResult ? 'true' : 'false'));
-    
-    if (!$updateResult) {
-        // Verificar se existe método para pegar mensagem de erro
-        $errorMessage = "Erro interno do servidor";
+    foreach ($allowedFields as $field => $setter) {
+        error_log("Verificando campo '$field':");
+        error_log("  - Existe? " . (array_key_exists($field, $data) ? 'SIM' : 'NÃO'));
         
-        if (method_exists($product, 'getErrorMessage')) {
-            $errorMessage = $product->getErrorMessage();
-            error_log("Mensagem de erro do produto: " . $errorMessage);
+        if (array_key_exists($field, $data)) {
+            error_log("  - Valor: " . var_export($data[$field], true));
+            error_log("  - É null? " . ($data[$field] === null ? 'SIM' : 'NÃO'));
+            error_log("  - É string vazia? " . ($data[$field] === '' ? 'SIM' : 'NÃO'));
+        }
+        
+        if (array_key_exists($field, $data) && $data[$field] !== null) {
+            // Permitir string vazia apenas para description
+            if ($data[$field] === '' && $field !== 'description') {
+                error_log("  - PULANDO: campo vazio e não é description");
+                continue;
+            }
+            
+            error_log("  - PROCESSANDO campo '$field'");
+            
+            // Validações específicas
+            switch ($field) {
+                case 'category_id':
+                    if (!$this->validateCategory($data[$field])) {
+                        $this->call(400, "bad_request", "Categoria inválida", "error")->back();
+                        return;
+                    }
+                    break;
+                    
+                case 'cost_price':
+                case 'sale_price':
+                    if (!is_numeric($data[$field]) || $data[$field] < 0) {
+                        $this->call(400, "bad_request", "Preço deve ser um número positivo", "error")->back();
+                        return;
+                    }
+                    $data[$field] = (float) $data[$field];
+                    break;
+                    
+                case 'min_stock':
+                case 'max_stock':
+                    if (!is_numeric($data[$field]) || $data[$field] < 0) {
+                        $this->call(400, "bad_request", "Estoque deve ser um número positivo", "error")->back();
+                        return;
+                    }
+                    $data[$field] = (int) $data[$field];
+                    break;
+                    
+                case 'active':
+                    $data[$field] = (int) $data[$field];
+                    break;
+            }
+            
+            // Aplicar a atualização
+            $product->$setter($data[$field]);
+            $updated = true;
+            error_log("  - APLICADO: $setter com valor " . var_export($data[$field], true));
         } else {
-            error_log("AVISO: Método 'getErrorMessage' não existe na classe Product");
+            error_log("  - IGNORADO: campo não atende critérios");
         }
-        
-        // Verificar se existe método para pegar último erro SQL
-        if (method_exists($product, 'getLastError')) {
-            $lastError = $product->getLastError();
-            error_log("Último erro SQL: " . $lastError);
-        }
-        
-        // Verificar se existe propriedade ou método para erro de PDO
-        if (method_exists($product, 'getPdoError')) {
-            $pdoError = $product->getPdoError();
-            error_log("Erro PDO: " . $pdoError);
-        }
-        
-        error_log("ERRO: Falha na atualização do produto");
+    }
+    
+    error_log("Updated = " . ($updated ? 'true' : 'false'));
+    error_log("=== FIM DEBUG ===");
+    
+    // Verificar se houve alguma atualização
+    if (!$updated) {
+        $this->call(400, "bad_request", "Nenhum campo válido fornecido para atualização", "warning")->back();
+        return;
+    }
+    
+    // Salvar no banco de dados
+    if (!$product->update()) {
+        $errorMessage = method_exists($product, 'getErrorMessage') 
+            ? $product->getErrorMessage() 
+            : "Erro ao atualizar produto";
+            
         $this->call(500, "internal_server_error", $errorMessage, "error")->back();
         return;
     }
     
-    error_log("Produto atualizado com sucesso!");
-    
-    // Log dos dados do produto APÓS a atualização
-    error_log("Dados do produto APÓS a atualização: " . json_encode([
-        'id' => $product->getId(),
-        'codigo' => $product->getCode(),
-        'name' => $product->getName(),
-        'categoria_id' => $product->getCategoryId(),
-        'preco_custo' => $product->getCostPrice(),
-        'preco_venda' => $product->getSalePrice(),
-        'ativo' => $product->getActive()
-    ]));
-    
-    // Verificar se os dados realmente mudaram no banco
-    $productVerify = new Product();
-    if ($productVerify->findById($data["id"])) {
-        error_log("Verificação - dados no banco após update: " . json_encode([
-            'id' => $productVerify->getId(),
-            'codigo' => $productVerify->getCode(),
-            'name' => $productVerify->getName(),
-            'categoria_id' => $productVerify->getCategoryId(),
-            'preco_custo' => $productVerify->getCostPrice(),
-            'preco_venda' => $productVerify->getSalePrice(),
-            'ativo' => $productVerify->getActive()
-        ]));
-    } else {
-        error_log("ERRO: Não foi possível verificar os dados após a atualização");
-    }
-    
-    error_log("=== FIM UPDATE PRODUCT DEBUG ===");
-    
+    // Retornar sucesso com dados atualizados
     $this->call(200, "success", "Produto atualizado com sucesso", "success")->back([
         "id" => $product->getId(),
-        "codigo" => $product->getCode(),
+        "code" => $product->getCode(),
         "name" => $product->getName(),
-        "preco_venda" => $product->getSalePrice(),
-        "ativo" => $product->getActive()
+        "description" => $product->getDescription(),
+        "category_id" => $product->getCategoryId(),
+        "unit" => $product->getUnit(),
+        "cost_price" => $product->getCostPrice(),
+        "sale_price" => $product->getSalePrice(),
+        "min_stock" => $product->getMinStock(),
+        "max_stock" => $product->getMaxStock(),
+        "active" => $product->getActive()
     ]);
+}
+
+/**
+ * Validar se a categoria existe
+ */
+private function validateCategory($categoryId): bool 
+{
+    if (empty($categoryId)) {
+        return false;
+    }
+    
+    $category = new Category();
+    return $category->findById($categoryId);
 }
 
     /**
@@ -383,31 +265,32 @@ class Products extends Api
      */
     public function deleteProduct(array $data): void
     {
-        $this->auth(); // Verificar autenticação
+        $this->auth();
 
-        if (!isset($data["id"])) {
-            $this->call(400, "bad_request", "ID é obrigatório", "error")->back();
+        if (empty($data["id"])) {
+            $this->call(400, "bad_request", "ID da categoria é obrigatório", "error")->back();
             return;
         }
 
         $product = new Product();
         if (!$product->findById($data["id"])) {
-            $this->call(404, "not_found", "Produto não encontrado", "error")->back();
+            $this->call(404, "not_found", "Produto não encontrada", "error")->back();
             return;
         }
 
-        // Verificar se produto tem movimentações de estoque
-        if ($product->hasStockMovements()) {
-            $this->call(409, "conflict", "Não é possível excluir produto com movimentações de estoque", "error")->back();
-            return;
-        }
+        // Verificar se Produto está associada a produtos (exemplo fictício)
+        // if ($product->hasProducts()) {
+        //     $this->call(409, "conflict", "Não é possível excluir Produto com produtos vinculados", "error")->back();
+        //     return;
+        // }
 
         if (!$product->delete()) {
             $this->call(500, "internal_server_error", $product->getErrorMessage(), "error")->back();
             return;
         }
 
-        $this->call(200, "success", "Produto excluído com sucesso", "success")->back();
+        $this->call(200, "success", "Produto excluída com sucesso", "success")->back();
+    
     }
 
     /**
@@ -500,7 +383,7 @@ class Products extends Api
         $this->call(200, "success", "Produto {$statusText} com sucesso", "success")->back([
             "id" => $product->getId(),
             "nome" => $product->getName(),
-            "ativo" => $product->getActive()
+            "active" => $product->getActive()
         ]);
     }
 }

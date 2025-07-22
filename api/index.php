@@ -34,7 +34,7 @@ $route->get("/id/", "Users:listUserById");
 //http://localhost:8080/inf-3at-2025/api/users/add
 $route->post("/add", "Users:createUser");
 //http://localhost:8080/inf-3at-2025/api/users/update
-$route->put("/update", "Users:updateUser");
+$route->put("/update/id/{id}", "Users:updateUser");
 //http://localhost:8080/inf-3at-2025/api/users/delete/id/38
 $route->delete("/delete/id/{id}", "Users:deleteUser");
 

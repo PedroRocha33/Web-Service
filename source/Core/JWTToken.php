@@ -17,7 +17,7 @@ class JWTToken
     {
         $tokenId    = base64_encode(random_bytes(16));
         $issuedAt   = new DateTimeImmutable();
-        $expire     = $issuedAt->modify('+90 minutes')->getTimestamp(); // 60 minutos
+        $expire     = $issuedAt->modify('+200 minutes')->getTimestamp(); // 60 minutos
 
         // Create the token as an array
         $data = [
