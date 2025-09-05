@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ - Armazém Conectado</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/Web-Service/assets/faqs.css">
+    <link rel="stylesheet" href="/Web-Service/assets/faqs.css"">
 </head>
 
 <body>
@@ -20,10 +20,10 @@
 
                 <nav>
                     <ul>
-                        <li><a href="index.html#features">Funcionalidades</a></li>
-                        <li><a href="index.html#benefits">Benefícios</a></li>
-                        <li><a href="sobre.html">Sobre Nós</a></li>
-                        <li><a href="contato.html">Contato</a></li>
+                        <li><a href="<?= url("/index#features") ?>">Funcionalidades</a></li>
+                        <li><a href="<?= url("/index#benefits") ?>">Benefícios</a></li>
+                        <li><a href="<?= url("/sobre") ?>">Sobre Nós</a></li>
+                        <li><a href="<?= url("/contato") ?>">Contato</a></li>
                     </ul>
                 </nav>
 

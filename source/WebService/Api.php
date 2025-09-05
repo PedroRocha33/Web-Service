@@ -59,16 +59,7 @@ class Api
             exit();
         }
 
-        // $this->userAuth = $decoded->data;
-
-          // ✅ CORREÇÃO: Extrair apenas o ID do usuário
-        $userData = (array) $decoded->data;
-        $userId = $userData['id'] ?? $userData['user_id'] ?? null;
-        
-        if ($userId) {
-            $this->userAuth = new User($userId);
-        }
-    
+        $this->userAuth = $decoded->data;
     }
 
 }

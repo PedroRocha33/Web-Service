@@ -1,0 +1,18 @@
+{
+    "require": {
+        "league/plates": "^3.6",
+        "coffeecode/router": "^2.0",
+        "firebase/php-jwt": "^6.11",
+        "sorfabiosantos/uploader": "^1.0.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Source\\": "source/"
+        },
+        "files": [
+            "source/Core/Config.php",
+            "source/Core/Helpers.php"
+
+        ]
+    }
+}

@@ -13,6 +13,8 @@ class User extends Model
     protected $email;
     protected $password;
     protected $photo;
+    protected $link;
+
 
     public function __construct(
         int $id = null,
@@ -20,7 +22,8 @@ class User extends Model
         string $name = null,
         string $email = null,
         string $password = null,
-        string $photo = null
+        string $photo = null,
+        string $link = null
     )
     {
         $this->table = "users";
@@ -30,6 +33,7 @@ class User extends Model
         $this->email = $email;
         $this->password = $password;
         $this->photo = $photo;
+        $this->link = $link;
     }
 
     public function getId(): ?int

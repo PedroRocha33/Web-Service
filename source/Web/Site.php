@@ -1,0 +1,57 @@
+<?php
+
+namespace Source\Web;
+
+class Site extends Controller
+{
+    public function __construct()
+    {
+        parent::__construct("web");
+    }
+
+    public function home(): void
+    {
+        //echo "Home Page...";
+        echo $this->view->render("index",[]);
+    }
+
+    public function about(): void
+    {
+        //echo "Sobre";
+         echo $this->view->render("sobre", []);
+    }
+
+    public function contact(): void
+    {
+        echo $this->view->render("contato", []);
+    }
+
+    public function register(): void
+    {
+echo $this->view->render("cadastro", []);    }
+
+    public function login(): void
+    {
+echo $this->view->render("login", []);    }
+
+    public function faqs(): void
+    {
+        echo $this->view->render("faqs", []);
+    }
+
+    // public function login(): void
+    // {
+    //     echo $this->view->render("login",[]);
+    // }
+
+    // public function register (array$data): void
+    // {
+    //     echo $this->view->render("register", []);
+    // }
+
+    public function error (array $data): void
+    {
+        echo "Error {$data["errcode"]}...";
+    }
+
+}

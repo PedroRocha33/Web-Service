@@ -6,6 +6,18 @@
     <title>Cadastro - Armazém Conectado</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/Web-Service/assets/cadastro.css">
+    <style>
+        .btn-link {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007BFF;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-family: Arial, sans-serif;
+        transition: background 0.3s ease;
+    }
+    </style>
 </head>
 <body>
     <div class="register-container">
@@ -64,15 +76,15 @@
                     </label>
                 </div>
                 
-                <button type="submit" class="btn">Criar conta</button>
-                
+                <a href="<?= url("/app") ?>" class="btn-link">Entrar</a>
+
                 <div class="register-footer">
-                    Já tem uma conta? <a href="login.html">Faça login</a>
+                    Já tem uma conta? <a href="<?= url("/app") ?>">Faça login</a>
                 </div>
             </form>
         </div>
         
-        <a href="index.html" class="back-to-home">
+        <a href="<?= url("/"); ?> class="back-to-home">
             <i class="fas fa-arrow-left"></i> Voltar para página inicial
         </a>
     </div>

@@ -6,10 +6,20 @@ namespace Composer\Autoload;
 
 class ComposerStaticInitbbb8275d1c6cbe50d3de2fe8af0f3af6
 {
+    public static $files = array (
+        '5305627083d3ec2874596db9a7f393ea' => __DIR__ . '/../..' . '/source/Core/Config.php',
+        'fa19c08a8f19d98504968827fbadd39e' => __DIR__ . '/../..' . '/source/Core/Helpers.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'S' => 
         array (
             'Source\\' => 7,
+            'SorFabioSantos\\Uploader\\' => 24,
+        ),
+        'L' => 
+        array (
+            'League\\Plates\\' => 14,
         ),
         'F' => 
         array (
@@ -25,6 +35,14 @@ class ComposerStaticInitbbb8275d1c6cbe50d3de2fe8af0f3af6
         'Source\\' => 
         array (
             0 => __DIR__ . '/../..' . '/source',
+        ),
+        'SorFabioSantos\\Uploader\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/sorfabiosantos/uploader/src',
+        ),
+        'League\\Plates\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/league/plates/src',
         ),
         'Firebase\\JWT\\' => 
         array (

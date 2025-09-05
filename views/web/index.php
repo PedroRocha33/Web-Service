@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Armazém Conectado - Sistema de Gestão de Estoque</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/Web-Service/assets/style.css">
+    <link rel="stylesheet" href="/Web-Service/assets/style.css">">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo">
+                <a href="<?= url("/index") ?>" class="logo">
                     <i class="fas fa-box-open"></i>
                     <h1>Armazém Conectado</h1>
                 </a>
@@ -19,17 +19,17 @@
                 <nav>
                     <ul>
                         <li><a href="#features">Funcionalidades</a></li>
-                        <li><a href="sobre.html">Sobre</a></li>
+                        <li><a href="<?= url("/sobre") ?>">Sobre</a></li>
                         <li><a href="#benefits">Benefícios</a></li>
-                        <li><a href="contato.html">Contato</a></li>
-                        <li><a href="faqs.html">FAQS</a></li>
+                        <li><a href="<?= url("/contato") ?>">Contato</a></li>
+                        <li><a href="<?= url("/faqs"); ?>">FAQS</a></li>
 
                     </ul>
                 </nav>
                 
                 <div class="auth-buttons">
-                    <a href="login.html" class="btn btn-outline">Entrar</a>
-                    <a href="cadastro.html" class="btn btn-primary">Cadastre-se</a>
+                    <a href="<?= url("/login") ?>" class="btn btn-outline">Entrar</a>
+                    <a href="<?= url("/registro")?>" class="btn btn-primary">Cadastre-se</a>
                 </div>
                 
                 <button class="mobile-menu-btn">
@@ -43,7 +43,7 @@
         <div class="container">
             <h2>Sistema de Gestão de Estoque</h2>
             <p>Controle seu inventário de forma eficiente, automática e inteligente. A solução completa para pequenas e médias empresas otimizarem seus processos logísticos.</p>
-            <a href="cadastro.html" class="btn btn-white">Comece Agora</a>
+            <a href="<?= url("/registro") ?>" class="btn btn-white">Comece Agora</a>
         </div>
     </section>
     
@@ -119,7 +119,7 @@
                         <li><i class="fas fa-check-circle"></i> Tomada de decisões baseadas em dados precisos</li>
                     </ul>
                     
-                    <a href="cadastro.html" class="btn btn-primary" style="margin-top: 20px;">Experimente Grátis</a>
+                    <a href="<?= url("/registro") ?>" class="btn btn-primary" style="margin-top: 20px;">Experimente Grátis</a>
                 </div>
                 
                 <div class="benefits-image">

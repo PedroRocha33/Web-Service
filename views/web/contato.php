@@ -18,17 +18,17 @@
                 
                 <nav>
                     <ul>
-                        <li><a href="index.html#features">Funcionalidades</a></li>
-                        <li><a href="index.html#benefits">Benefícios</a></li>
-                        <li><a href="sobre.html">Sobre Nós</a></li>
-                        <li><a href="faqs.html">FAQ</a></li>
-                        <li><a href="contato.html">Contato</a></li>
+                        <li><a href="<?= url("/index#features") ?>">Funcionalidades</a></li>
+                        <li><a href="<?= url("/index#benefits") ?>">Benefícios</a></li>
+                        <li><a href="<?= url("/sobre") ?>">Sobre Nós</a></li>
+                        <li><a href="<?= url("/faqs") ?>">FAQ</a></li>
+                        <li><a href="<?= url("/contato") ?>">Contato</a></li>
                     </ul>
                 </nav>
                 
                 <div class="auth-buttons">
-                    <a href="login.html" class="btn btn-outline">Entrar</a>
-                    <a href="cadastro.html" class="btn btn-primary">Cadastre-se</a>
+                    <a href="<?= url("/login") ?>" class="btn btn-outline">Entrar</a>
+                    <a href="<?= url("/registro") ?>" class="btn btn-primary">Cadastre-se</a>
                 </div>
                 
                 <button class="mobile-menu-btn">
@@ -42,7 +42,7 @@
         <div class="container">
             <h2>Entre em Contato</h2>
             <div class="breadcrumb">
-                <a href="index.html">Home</a>
+                <a href="<?= url("/index") ?>">Home</a>
                 <span>></span>
                 <span>Contato</span>
             </div>

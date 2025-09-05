@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sobre Nós - Armazém Conectado</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/Web-Service/assets/sobre.css">
+    <link rel="stylesheet" href="/Web-Service/assets/sobre.css">">
 </head>
 <body>
     <header>
@@ -20,14 +20,14 @@
                     <ul>
                         <li><a href="index.html#features">Funcionalidades</a></li>
                         <li><a href="index.html#benefits">Benefícios</a></li>
-                        <li><a href="faqs.html">FAQ</a></li>
-                        <li><a href="contato.html">Contato</a></li>
+                        <li><a href="<?= url("/faqs") ?>">FAQ</a></li>
+                        <li><a href="<?= url("/contato") ?>">Contato</a></li>
                     </ul>
                 </nav>
                 
                 <div class="auth-buttons">
-                    <a href="login.html" class="btn btn-outline">Entrar</a>
-                    <a href="cadastro.html" class="btn btn-primary">Cadastre-se</a>
+                    <a href="<?= url("/login"); ?>" class="btn btn-outline">Entrar</a>
+                    <a href="<?= url("/registro"); ?>" class="btn btn-primary">Cadastre-se</a>
                 </div>
                 
                 <button class="mobile-menu-btn">
