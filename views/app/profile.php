@@ -205,9 +205,11 @@ if (!isset($_SESSION['user_name'])) {
                 <?= ($_SESSION['user_email'] ?? 'Visitante'); ?>
             </div>
             
-            <button class="edit-button" onclick="editProfile()">
-                Editar Perfil
-            </button>
+            <a href="<?= url("/app/edit-profile") ?>">
+    <button class="edit-button">
+        Editar Perfil
+    </button>
+</a>
             
             <div class="social-links">
                 <a href="#" class="social-link" title="LinkedIn">

@@ -1,11 +1,10 @@
-
 <?php
+session_start();
+
 use Source\Core\Connect;
 
 require_once __DIR__ . "/../../source/Core/Config.php";
 require_once __DIR__ . "/../../source/Core/Connect.php";
-
-session_start();
 
 if (isset($_POST['submit']) && !empty($_POST['email']) && !empty($_POST['password'])) {
     $pdo = Connect::getInstance();
@@ -25,6 +24,9 @@ if (isset($_POST['submit']) && !empty($_POST['email']) && !empty($_POST['passwor
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['name'];
         $_SESSION['user_email'] = $user['email'];
+        
+        // Adicione esta linha: salva o caminho da foto do banco de dados na sessão
+        $_SESSION['user_photo'] = $user['photo'];
         
         // regenerar id da sessão (boa prática)
         session_regenerate_id(true);

@@ -1,11 +1,6 @@
 <?php
 session_start();
 
-// echo '<pre>';
-// print_r($_FILES);
-// echo '</pre>';
-// die();
-
 require_once __DIR__ . "/../../source/Core/Connect.php";
 
 if (!isset($_SESSION['user_id'])) {
@@ -13,88 +8,73 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$pdo = \Source\Core\Connect::getInstance();
+try {
+    $pdo = \Source\Core\Connect::getInstance();
 
-// Busca os dados atuais do usuário
-$stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id LIMIT 1");
-$stmt->bindParam(":id", $_SESSION['user_id'], PDO::PARAM_INT);
-$stmt->execute();
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Fetch current user data
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id LIMIT 1");
+    $stmt->bindParam(":id", $_SESSION['user_id'], PDO::PARAM_INT);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$photo = (!empty($_FILES["photo"]["name"]) ? $_FILES["photo"] : null);
+    $id = $_SESSION['user_id'];
+    $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
+    $password = $_POST['password'] ?? null;
+    $photoPath = null;
 
+    // Handle photo upload
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === 0) {
+        $uploadDir = __DIR__ . "/storage/images/";
 
-$id = $_SESSION['user_id'];
-$email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
-$password = $_POST['password'] ?? null;
+        // Create the directory if it doesn't exist
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
 
-// Upload da foto
-// $photoPath = null;
-// if (!empty($_FILES['photo']['name'])) {
-//     $uploadDir = __DIR__ . "/storage/images/";
-//     if (!is_dir($uploadDir)) {
-//         mkdir($uploadDir, 0777, true);
-//     }
+        // Get the full temporary file path
+        $tmpFilePath = $_FILES['photo']['tmp_name'];
 
-//     $fileName = uniqid() . "_" . basename($_FILES['photo']['name']);
-//     $filePath = $uploadDir . $fileName;
+        // Use sha1_file with the correct path
+        $fileName = sha1_file($tmpFilePath);
+        $fileExtension = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
+        $filePath = $uploadDir . $fileName . '.' . $fileExtension;
 
-//     if (move_uploaded_file($_FILES['photo']['tmp_name'], $filePath)) {
-//         $photoPath = "/storage/images/" . $fileName;
-//     }
-// }
-
-$photoPath = null;
-
-if (!empty($_FILES['photo']['name'])) {
-    $uploadDir = __DIR__ . "/storage/images/";
-
-    // Cria o diretório se ele não existir
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
+        if (move_uploaded_file($tmpFilePath, $filePath)) {
+            $photoPath = "/storage/images/" . $fileName . '.' . $fileExtension;
+        }
     }
 
-    // Gerar um nome único baseado no conteúdo do arquivo
-    $fileName = sha1_file($_FILES['photo']['tmp_name']);
-    $fileExtension = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
+    // Build the query dynamically
+    $sql = "UPDATE users SET email = :email";
+    $params = [":email" => $email, ":id" => $id];
 
-    $filePath = $uploadDir . $fileName . '.' . $fileExtension;
-
-    // Move o arquivo temporário para o destino final
-    if (move_uploaded_file($_FILES['photo']['tmp_name'], $filePath)) {
-        // Armazena o caminho relativo para salvar no banco de dados
-        $photoPath = "/storage/images/" . $fileName . '.' . $fileExtension;
+    if (!empty($password)) {
+        $sql .= ", password = :password";
+        $params[":password"] = password_hash($password, PASSWORD_DEFAULT);
     }
-}
 
-
-
-// Monta a query dinamicamente
-$sql = "UPDATE users SET email = :email";
-$params = [":email" => $email, ":id" => $id];
-
-if (!empty($password)) {
-    $sql .= ", password = :password";
-    $params[":password"] = password_hash($password, PASSWORD_DEFAULT);
-}
-
-if ($photoPath) {
-    $sql .= ", photo = :photo";
-    $params[":photo"] = $photoPath;
-}
-
-$sql .= " WHERE id = :id";
-
-$stmt = $pdo->prepare($sql);
-if ($stmt->execute($params)) {
-    $_SESSION['success'] = "Perfil atualizado com sucesso!";
     if ($photoPath) {
-        $_SESSION['user_photo'] = $photoPath; // atualiza na sessão também
+        $sql .= ", photo = :photo";
+        $params[":photo"] = $photoPath;
     }
-} else {
-    $_SESSION['error'] = "Erro ao atualizar o perfil.";
-}
 
+    $sql .= " WHERE id = :id";
+
+    $stmt = $pdo->prepare($sql);
+    if ($stmt->execute($params)) {
+        $_SESSION['success'] = "Perfil atualizado com sucesso!";
+        if ($photoPath) {
+            $_SESSION['user_photo'] = $photoPath; // Update the session with the new photo path
+             header("Location: /Web-service/app/profile"); // ajuste a rota
+        }
+    } else {
+        $_SESSION['error'] = "Erro ao atualizar o perfil.";
+    }
+
+} catch (\PDOException $e) {
+    // Handle database errors
+    $_SESSION['error'] = "Erro de banco de dados: " . $e->getMessage();
+}
 
 ?>
 <!DOCTYPE html>
