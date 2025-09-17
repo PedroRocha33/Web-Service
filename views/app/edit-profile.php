@@ -1,5 +1,11 @@
 <?php
 session_start();
+
+// echo '<pre>';
+// print_r($_FILES);
+// echo '</pre>';
+// die();
+
 require_once __DIR__ . "/../../source/Core/Connect.php";
 
 if (!isset($_SESSION['user_id'])) {
@@ -23,20 +29,45 @@ $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
 $password = $_POST['password'] ?? null;
 
 // Upload da foto
+// $photoPath = null;
+// if (!empty($_FILES['photo']['name'])) {
+//     $uploadDir = __DIR__ . "/storage/images/";
+//     if (!is_dir($uploadDir)) {
+//         mkdir($uploadDir, 0777, true);
+//     }
+
+//     $fileName = uniqid() . "_" . basename($_FILES['photo']['name']);
+//     $filePath = $uploadDir . $fileName;
+
+//     if (move_uploaded_file($_FILES['photo']['tmp_name'], $filePath)) {
+//         $photoPath = "/storage/images/" . $fileName;
+//     }
+// }
+
 $photoPath = null;
+
 if (!empty($_FILES['photo']['name'])) {
     $uploadDir = __DIR__ . "/storage/images/";
+
+    // Cria o diretório se ele não existir
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
 
-    $fileName = uniqid() . "_" . basename($_FILES['photo']['name']);
-    $filePath = $uploadDir . $fileName;
+    // Gerar um nome único baseado no conteúdo do arquivo
+    $fileName = sha1_file($_FILES['photo']['tmp_name']);
+    $fileExtension = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
 
+    $filePath = $uploadDir . $fileName . '.' . $fileExtension;
+
+    // Move o arquivo temporário para o destino final
     if (move_uploaded_file($_FILES['photo']['tmp_name'], $filePath)) {
-        $photoPath = "/storage/images/" . $fileName;
+        // Armazena o caminho relativo para salvar no banco de dados
+        $photoPath = "/storage/images/" . $fileName . '.' . $fileExtension;
     }
 }
+
+
 
 // Monta a query dinamicamente
 $sql = "UPDATE users SET email = :email";
