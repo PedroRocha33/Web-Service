@@ -39,6 +39,8 @@ echo $this->view->render("login", []);    }
         echo $this->view->render("faqs", []);
     }
 
+    
+
     // public function login(): void
     // {
     //     echo $this->view->render("login",[]);

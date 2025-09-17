@@ -25,7 +25,7 @@ $route->namespace("Source\WebService");
 $route->group("/users");
 
 $route->post("/login", "Users:login");
-$route->post("/photo", "Users:update    Photo");
+$route->post("/photo", "Users:updatePhoto");
 //http://localhost:8080/inf-3at-2025/api/users/
 $route->get("/", "Users:listUsers");
 //http://localhost:8080/inf-3at-2025/api/users/id/2

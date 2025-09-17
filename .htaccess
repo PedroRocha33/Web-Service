@@ -1,4 +1,6 @@
 RewriteEngine On
+Options All -Indexes
+
 
 RewriteCond %{SCRIPT_FILENAME} !-f
 RewriteCond %{SCRIPT_FILENAME} !-d

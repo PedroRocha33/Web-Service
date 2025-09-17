@@ -15,6 +15,17 @@ class App extends Controller
         //echo "Olá, Admin!";
     }
 
+     public function profile (): void
+    {
+        echo $this->view->render("profile", []);
+        //echo "Olá, Admin!";
+    }
+
+    public function editprofile (): void
+    {
+        echo $this->view->render("edit-profile", []);
+        //echo "Olá, Admin!";
+    }
     // public function clients (): void
     // {
     //     echo $this->view->render("clients", []);

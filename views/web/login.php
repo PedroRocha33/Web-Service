@@ -1,3 +1,44 @@
+
+<?php
+use Source\Core\Connect;
+
+require_once __DIR__ . "/../../source/Core/Config.php";
+require_once __DIR__ . "/../../source/Core/Connect.php";
+
+session_start();
+
+if (isset($_POST['submit']) && !empty($_POST['email']) && !empty($_POST['password'])) {
+    $pdo = Connect::getInstance();
+
+    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+    $password = $_POST['password'];
+
+    // Consulta segura
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
+    $stmt->bindParam(":email", $email);
+    $stmt->execute();
+
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user && password_verify($password, $user['password'])) {
+        // login ok
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_name'] = $user['name'];
+        $_SESSION['user_email'] = $user['email'];
+        
+        // regenerar id da sessão (boa prática)
+        session_regenerate_id(true);
+
+        header("Location: /Web-service/app"); // ajuste a rota
+        exit;
+    } else {
+        $_SESSION['error'] = "E-mail ou senha inválidos.";
+        header("Location: /Web-Service/login");
+        exit;
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -239,12 +280,12 @@
                 <p>Sistema de Gestão de Estoque</p>
             </div>
             
-            <form class="login-form" action="#" method="post">
+            <form class="login-form" action="" method="post">
                 <div class="form-group">
                     <label for="email">E-mail</label>
                     <div class="input-group">
                         <i class="far fa-envelope"></i>
-                        <input type="email" id="email" class="input-field" placeholder="seu@email.com" required>
+                        <input type="email" id="email" name="email" class="input-field" placeholder="seu@email.com" required>
                     </div>
                 </div>
                 
@@ -252,7 +293,7 @@
                     <label for="password">Senha</label>
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+                        <input type="password" name="password" id="password" class="input-field" placeholder="••••••••" required>
                         <button type="button" class="toggle-password" aria-label="Mostrar senha">
                             <i class="far fa-eye"></i>
                         </button>
@@ -267,7 +308,7 @@
                     <a href="#" class="forgot-password">Esqueceu a senha?</a>
                 </div>
                 
-                <a href="<?= url("/app") ?>" class="btn-link">Entrar</a>
+                <button type="submit" name="submit" class="btn-primary">Entrar</button>
                 
                 <div class="login-footer">
                     Não tem uma conta? <a href="<?= url("/registro") ?>">Cadastre-se</a>
@@ -275,7 +316,7 @@
             </form>
         </div>
         
-        <a href="<?= url("/index"); ?>" class="back-to-home">
+        <a href="<?= url("/"); ?>" class="back-to-home">
             <i class="fas fa-arrow-left"></i> Voltar para página inicial
         </a>
     </div>

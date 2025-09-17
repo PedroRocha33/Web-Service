@@ -128,6 +128,41 @@ class User extends Model
         return true;
     }
 
+     public function createUser(array $data): bool
+    {
+        // Certifique-se de ter a conexão PDO disponível (por exemplo, via um método estático ou global)
+        // Exemplo: $pdo = getPdoConnection();
+        // Ou, se a conexão estiver em Config.php, inclua-a no início do script.
+        global $pdo; // Exemplo de uso de variável global, se for o caso
+
+        try {
+            // 1. Receber e sanear os dados do formulário
+            $name = filter_var($data['name'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $email = filter_var($data['email'], FILTER_SANITIZE_EMAIL);
+            $password = $data['password'];
+
+            // 2. Criptografar a senha para segurança
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            if ($hashed_password === false) {
+                // Falha ao criar o hash da senha
+                return false;
+            }
+
+            
+            // 4. Inserir os dados no banco de dados de forma segura (PDO)
+            $stmt = $pdo->prepare("INSERT INTO users (name, email, password, photo) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$name, $email, $hashed_password, $photo_name]);
+
+            return true; // Sucesso na inserção
+            
+        } catch (PDOException $e) {
+            // Logar o erro do banco de dados para depuração, mas não exibi-lo ao usuário
+            error_log("Erro no banco de dados: " . $e->getMessage());
+            return false;
+        };
+    }
+
+
     public function findByEmail (string $email): bool
     {
         $sql = "SELECT * FROM users WHERE email = :email";

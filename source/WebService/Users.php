@@ -2,9 +2,12 @@
 
 namespace Source\WebService;
 
+use Source\Core\Connect;
 use Source\Models\User;
 use Source\Core\JWTToken;
 use SorFabioSantos\Uploader\Uploader;
+
+
 
 
 class Users extends Api
@@ -19,31 +22,35 @@ class Users extends Api
 
     public function createUser(array $data)
     {
+                 $pdo = Connect::getInstance(); // pega a instância única do PDO
 
-        // verifica se os dados estão preenchidos
-        if(in_array("", $data)){
-            $this->call(400, "bad_request", "Dados inválidos", "error")->back();
-            return;
-        }
 
-        $user = new User(
-            null,
-            $data["idType"] ?? null,
-            $data["name"] ?? null,
-            $data["email"] ?? null,
-            $data["password"] ?? null
-        );
+      try {
 
-        if(!$user->insert()){
-            $this->call(500, "internal_server_error", $user->getErrorMessage(), "error")->back();
-            return;
-        }
-        // montar $response com as informações necessárias para mostrar no front
-        $response = [
-            "name" => $user->getName(),
-            "email" => $user->getEmail(),
-            "photo" => $user->getPhoto()
-        ];
+
+            // 1. Receber e sanear os dados do formulário
+            $name = filter_var($data['name'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $email = filter_var($data['email'], FILTER_SANITIZE_EMAIL);
+            $password = $data['password'];
+
+            // 2. Criptografar a senha para segurança
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            if ($hashed_password === false) {
+                // Falha ao criar o hash da senha
+                return false;
+            }
+
+            // 4. Inserir os dados no banco de dados de forma segura (PDO)
+            $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+            $stmt->execute([$name, $email, $hashed_password]);
+
+            return true; // Sucesso na inserção
+            
+        } catch (PDOException $e) {
+            // Logar o erro do banco de dados para depuração, mas não exibi-lo ao usuário
+            error_log("Erro no banco de dados: " . $e->getMessage());
+            return false;
+        };
 
         $this->call(201, "created", "Usuário criado com sucesso", "success")
             ->back($response);

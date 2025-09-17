@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['user_name'])) {
+    header("Location: /login.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -413,7 +422,9 @@
             <div class="sidebar-header">
                 <div class="logo">Area de App</div>
                 <div class="user-info">
-                    <div class="user-name">Nome Usuario</div>
+                    <div class="user-name">
+                           <?= ($_SESSION['user_name'] ?? 'Visitante'); ?>
+                    </div>
                     <div class="user-role">Administrador</div>
                 </div>
             </div>
@@ -580,6 +591,15 @@
             </div>
         </div>
     </div>
+
+<script>
+function logout() {
+    if (confirm("Deseja realmente sair?")) {
+        window.location.href = "/Web-Service/views/app/logout.php"; 
+    }
+}
+</script>
+
 
 </body>
 </html>
