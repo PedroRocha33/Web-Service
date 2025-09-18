@@ -206,10 +206,10 @@ if (!isset($_SESSION['user_name'])) {
             </div>
             
             <a href="<?= url("/app/edit-profile") ?>">
-    <button class="edit-button">
-        Editar Perfil
-    </button>
-</a>
+                <button class="edit-button">
+                 Editar Perfil
+                </button>
+            </a>
             
             <div class="social-links">
                 <a href="#" class="social-link" title="LinkedIn">

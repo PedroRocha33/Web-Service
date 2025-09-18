@@ -6,6 +6,8 @@ require_once "source/Core/Config.php";
 // require __DIR__ . "/source/core/Helpers.php";
 require_once "source/Core/Helpers.php";
 
+require_once "source/Models/User.php";
+
 
 
 
@@ -51,6 +53,8 @@ $route->group("/admin");
 $route->get("/", "Admin:home");
 $route->get("/clientes", "Admin:clients");
 $route->group(null);
+
+
 
 $route->get("/ops/{errcode}", "Site:error");
 

@@ -36,10 +36,10 @@ const ALLOWED_FILE_TYPES = [
 ];
 
 // Mensagens configuráveis (viram variáveis também)
-$IMAGE_SIZE_ERROR_MESSAGE = "Tamanho inválido para a imagem. Deve ser entre {const IMAGE_MIN_SIZE} e {const IMAGE_MAX_SIZE}.";
-$IMAGE_TYPE_ERROR_MESSAGE = "Tipo de imagem inválido. Apenas JPG, PNG e GIF são permitidos.";
-$IMAGE_MOVE_ERROR_MESSAGE = "Erro ao mover o arquivo para o diretório de destino.";
+const IMAGE_SIZE_ERROR_MESSAGE = "Tamanho inválido para a imagem. Deve ser entre {const IMAGE_MIN_SIZE} e {const IMAGE_MAX_SIZE}.";
+const IMAGE_TYPE_ERROR_MESSAGE = "Tipo de imagem inválido. Apenas JPG, PNG e GIF são permitidos.";
+const IMAGE_MOVE_ERROR_MESSAGE = "Erro ao mover o arquivo para o diretório de destino.";
 
-$FILE_SIZE_ERROR_MESSAGE = "Tamanho inválido para o arquivo. Deve ser até {const FILE_MAX_SIZE}.";
-$FILE_TYPE_ERROR_MESSAGE = "Tipo de arquivo inválido. Apenas PDF, DOC, DOCX, XLS, XLSX e TXT são permitidos.";
-$FILE_MOVE_ERROR_MESSAGE = "Erro ao mover o arquivo para o diretório de destino.";
+const FILE_SIZE_ERROR_MESSAGE = "Tamanho inválido para o arquivo. Deve ser até {const FILE_MAX_SIZE}.";
+const FILE_TYPE_ERROR_MESSAGE = "Tipo de arquivo inválido. Apenas PDF, DOC, DOCX, XLS, XLSX e TXT são permitidos.";
+const FILE_MOVE_ERROR_MESSAGE = "Erro ao mover o arquivo para o diretório de destino.";

@@ -430,7 +430,7 @@ if (!isset($_SESSION['user_name'])) {
             </div>
             
             <nav class="nav-menu">
-                <div class="nav-item active" onclick="switchSection('dashboard')">
+                <!-- <div class="nav-item active" onclick="switchSection('dashboard')">
                     <span class="nav-icon">📊</span>
                     <span>Dashboard</span>
                 </div>
@@ -441,8 +441,8 @@ if (!isset($_SESSION['user_name'])) {
                 <div class="nav-item" onclick="switchSection('inventory')">
                     <span class="nav-icon">📋</span>
                     <span>Estoque</span>
-                </div>
-                <div class="nav-item" onclick="switchSection('orders')">
+                </div> -->
+                <!-- <div class="nav-item" onclick="switchSection('orders')">
                     <span class="nav-icon">🛒</span>
                     <span>Pedidos</span>
                 </div>
@@ -453,11 +453,13 @@ if (!isset($_SESSION['user_name'])) {
                 <div class="nav-item" onclick="switchSection('reports')">
                     <span class="nav-icon">📈</span>
                     <span>Relatórios</span>
-                </div>
-                <div class="nav-item" onclick="switchSection('settings')">
-                    <span class="nav-icon">⚙️</span>
-                    <span>Configurações</span>
-                </div>
+                </div> -->
+                <a href="<?= url("/app/profile") ?>">
+            <div class="nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span>Configurações</span>
+            </div>
+                </a>
                 <div class="nav-item" onclick="logout()">
                     <span class="nav-icon">🚪</span>
                     <span>Sair</span>
@@ -598,6 +600,9 @@ function logout() {
         window.location.href = "/Web-Service/views/app/logout.php"; 
     }
 }
+
+
+
 </script>
 
 

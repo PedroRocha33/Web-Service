@@ -25,8 +25,8 @@ if (isset($_POST['submit'])) {
             throw new Exception("Conexão com o banco de dados não inicializada.");
         }
 
-        $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-        $stmt->execute([$name, $email, $hashed_password]);
+        $stmt = $pdo->prepare("INSERT INTO users (name, email, password, link) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$name, $email, $hashed_password, $name]);
 
         //echo "Usuário inserido com sucesso!";
     } catch (PDOException $e) {
