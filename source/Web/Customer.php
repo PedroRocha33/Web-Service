@@ -2,14 +2,29 @@
 
 namespace Source\Web;
 
-use League\Plates\Engine;
-
-class Controller
+class Customer extends Controller
 {
-    protected $view;
-
-    public function __construct(string $pathToView)
+    public function __construct()
     {
-        $this->view = new Engine(__DIR__ . "/../../views/{$pathToView}", "php");
+        parent::__construct("web");
+    }
+
+    public function home(): void
+    {
+        
+        
+        echo $this->view->render("customer-home",[]);
+    }
+
+    public function catalog(): void
+    {
+        $products = [
+            "id" => 2,
+            "name" => "CPU"
+        ];
+
+        echo $this->view->render("customer-catalog",[
+            "products" => $products
+        ]);
     }
 }

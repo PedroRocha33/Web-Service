@@ -12,6 +12,7 @@ require_once "source/Models/User.php";
 
 
 use CoffeeCode\Router\Router;
+use Source\Models\User;
 
 ob_start();
 
@@ -59,6 +60,25 @@ $route->group(null);
 $route->get("/ops/{errcode}", "Site:error");
 
 $route->group(null);
+
+// Rotas da área individual, uma para cada cliente do SaaS
+// var_dump($_GET["route"]);
+$linkRaw = $_GET['route'] ?? '';
+if (preg_match('~^/?([^/]+)~', $linkRaw, $m)) {
+    $link = $m[1]; // ex.: "loja-fabio", "loja-maria", "loja-joao"
+} else {
+    $link = '';
+}
+//var_dump($link);
+$user = new User();
+if($user->findLink($link)){
+    $route->group("/{$link}");
+    $route->get("/", "Customer:home");
+    $route->get("/catalogo", "Customer:catalog");
+    // Demais rotas
+    // $route->get("/carrinho-compras", "Customer:cart");
+    $route->group(null);
+}
 
 $route->dispatch();
 

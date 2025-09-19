@@ -190,4 +190,17 @@ class User extends Model
 
     }
 
+    public function findLink (string $link): bool
+    {
+        $sql = "SELECT * FROM users WHERE link = :link";
+        $stmt = Connect::getInstance()->prepare($sql);
+        $stmt->bindValue(":link", $link);
+        $stmt->execute();
+        $result = $stmt->fetch();
+        if (!$result) {
+            return false;
+        }
+        return true;
+    }
+
 }
